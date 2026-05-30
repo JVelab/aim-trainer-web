@@ -43,6 +43,10 @@ Clickea objetivos en el orden correcto. El objetivo activo cambia según el colo
 - Tiempo de reacción promedio
 - Combo máximo
 
+## Screenshot
+
+![Demo](assets/images/demo.webp)
+
 ## 🎨 Características Visuales
 
 - **Estilo Futurista**: Tema dark con acentos neon (cyan, magenta, verde)
