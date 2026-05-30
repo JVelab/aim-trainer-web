@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador Puntería</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <section id="menu-screen">
+            <h1 class="game-title">PUNTERÍA</h1>
+            <p class="game-subtitle">Entrena tu puntería</p>
+
+            <div class="modes-grid">
+                <div class="mode-card tracking" data-mode="tracking">
+                    <div class="mode-icon">◎</div>
+                    <h3 class="mode-title">Tracking</h3>
+                    <p class="mode-description">Sigue el objetivo con el cursor. Mantén el puntero sobre el objetivo el mayor tiempo posible.</p>
+                </div>
+
+                <div class="mode-card flicking" data-mode="flicking">
+                    <div class="mode-icon">⚡</div>
+                    <h3 class="mode-title">Flicking</h3>
+                    <p class="mode-description">Clic rápido a objetivos. Haz clic en los objetivos lo más rápido posible.</p>
+                </div>
+
+                <div class="mode-card switching" data-mode="switching">
+                    <div class="mode-icon">⟲</div>
+                    <h3 class="mode-title">Switching</h3>
+                    <p class="mode-description">Cambio de objetivos. Clickea los objetivos en el orden correcto.</p>
+                </div>
+            </div>
+
+            <div class="leaderboard-section">
+                <h4 class="leaderboard-title">Mejores Puntuaciones</h4>
+                <div id="leaderboard-list" class="leaderboard-list">
+                    <p style="color: var(--text-secondary); text-align: center;">Sin puntuaciones aún</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="game-screen" class="hidden">
+            <canvas id="game-canvas"></canvas>
+
+            <div class="hud">
+                <div class="hud-left">
+                    <div class="hud-stat">
+                        <div class="hud-stat-label">Precisión</div>
+                        <div class="hud-stat-value accuracy" id="accuracy-value">0%</div>
+                    </div>
+                    <div class="hud-stat">
+                        <div class="hud-stat-label">Puntuación</div>
+                        <div class="hud-stat-value score" id="score-value">0</div>
+                    </div>
+                </div>
+
+                <div class="hud-center">
+                    <div class="hud-mode-title" id="mode-title">TRACKING</div>
+                    <div class="hud-timer" id="hud-timer">30s</div>
+                </div>
+
+                <div class="hud-right">
+                    <div class="hud-stat">
+                        <div class="hud-stat-label">Combo</div>
+                        <div class="hud-stat-value combo" id="combo-value">0</div>
+                    </div>
+                    <button class="pause-btn" id="pause-btn">⏸ PAUSA</button>
+                </div>
+            </div>
+
+            <div id="pause-overlay" class="modal-overlay hidden">
+                <div class="modal-content">
+                    <h2 class="modal-title pause">PAUSA</h2>
+                    <p class="modal-subtitle">El juego está en pausa</p>
+                    <div class="modal-buttons">
+                        <button class="btn" id="resume-btn">Continuar</button>
+                        <button class="btn secondary" id="menu-btn">Menú</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="results-overlay" class="modal-overlay hidden">
+                <div class="modal-content">
+                    <h2 class="modal-title results">RESULTADOS</h2>
+                    <p class="modal-subtitle">Sesión completada</p>
+                    
+                    <div class="results-grid">
+                        <div class="result-item">
+                            <div class="result-label">Precisión</div>
+                            <div class="result-value accuracy" id="result-accuracy">0%</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Puntuación</div>
+                            <div class="result-value score" id="result-score">0</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Aciertos</div>
+                            <div class="result-value hits" id="result-hits">0</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Tiempo Reacción</div>
+                            <div class="result-value reaction" id="result-reaction">0ms</div>
+                        </div>
+                    </div>
+
+                    <div class="modal-buttons">
+                        <button class="btn" id="restart-btn">Reiniciar</button>
+                        <button class="btn secondary" id="quit-btn">Menú</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="js/score.js"></script>
+    <script src="js/modes.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/game.js"></script>
+    <script>
+        let game = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            UI.init();
+
+            document.querySelectorAll('.mode-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const mode = card.dataset.mode;
+                    
+                    document.getElementById('menu-screen').classList.add('hidden');
+                    document.getElementById('game-screen').classList.remove('hidden');
+                    
+                    game = new Game();
+                    game.start(mode);
+                });
+            });
+
+            document.getElementById('pause-btn')?.addEventListener('click', () => {
+                if (game) game.pause();
+                document.getElementById('pause-overlay').classList.remove('hidden');
+            });
+
+            document.getElementById('resume-btn')?.addEventListener('click', () => {
+                document.getElementById('pause-overlay').classList.add('hidden');
+                if (game) game.resume();
+            });
+
+            document.getElementById('restart-btn')?.addEventListener('click', () => {
+                document.getElementById('results-overlay').classList.add('hidden');
+                const mode = ScoreSystem.getSessionStats().mode;
+                if (game) game.stop();
+                game = new Game();
+                game.start(mode);
+            });
+
+            document.getElementById('menu-btn')?.addEventListener('click', () => {
+                document.getElementById('pause-overlay').classList.add('hidden');
+                if (game) game.stop();
+                document.getElementById('game-screen').classList.add('hidden');
+                document.getElementById('menu-screen').classList.remove('hidden');
+                UI.updateLeaderboard();
+            });
+
+            document.getElementById('quit-btn')?.addEventListener('click', () => {
+                document.getElementById('results-overlay').classList.add('hidden');
+                if (game) game.stop();
+                document.getElementById('game-screen').classList.add('hidden');
+                document.getElementById('menu-screen').classList.remove('hidden');
+                UI.updateLeaderboard();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && game && game.isRunning) {
+                    if (document.getElementById('pause-overlay').classList.contains('hidden')) {
+                        game.pause();
+                        document.getElementById('pause-overlay').classList.remove('hidden');
+                    } else {
+                        document.getElementById('pause-overlay').classList.add('hidden');
+                        game.resume();
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
