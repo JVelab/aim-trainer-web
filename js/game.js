@@ -31,7 +31,6 @@ class Game {
                 this.modeInstance.onMouseMove(e.clientX, e.clientY);
             }
             UI.onMouseMove(e);
-            this.updateCrosshair(e.clientX, e.clientY);
         });
 
         this.canvas.addEventListener('click', (e) => {
@@ -44,27 +43,6 @@ class Game {
         this.canvas.addEventListener('contextmenu', (e) => {
             e.preventDefault();
         });
-    }
-
-    updateCrosshair(x, y) {
-        let crosshair = document.querySelector('.crosshair');
-        if (!crosshair) {
-            crosshair = document.createElement('div');
-            crosshair.className = 'crosshair';
-            crosshair.innerHTML = `
-                <svg width="40" height="40" viewBox="0 0 40 40">
-                    <circle cx="20" cy="20" r="15" fill="none" stroke="#00f0ff" stroke-width="1" opacity="0.5"/>
-                    <circle cx="20" cy="20" r="2" fill="#00f0ff"/>
-                    <line x1="20" y1="0" x2="20" y2="12" stroke="#00f0ff" stroke-width="1"/>
-                    <line x1="20" y1="28" x2="20" y2="40" stroke="#00f0ff" stroke-width="1"/>
-                    <line x1="0" y1="20" x2="12" y2="20" stroke="#00f0ff" stroke-width="1"/>
-                    <line x1="28" y1="20" x2="40" y2="20" stroke="#00f0ff" stroke-width="1"/>
-                </svg>
-            `;
-            document.body.appendChild(crosshair);
-        }
-        crosshair.style.left = x + 'px';
-        crosshair.style.top = y + 'px';
     }
 
     start(mode) {
