@@ -389,6 +389,15 @@ class SwitchingMode {
             }
         });
 
+        const activeTargets = this.targets.filter(t => t.active);
+        const allSpawned = this.spawnedTargets >= this.targetsPerRound;
+        const noneActive = activeTargets.length === 0;
+
+        if (noneActive && allSpawned) {
+            this.end();
+            return;
+        }
+
         if (this.spawnedTargets < this.targetsPerRound && now >= this.nextSpawnTime) {
             this.spawnNextTarget();
             this.nextSpawnTime = now + this.spawnDelay;
@@ -432,12 +441,10 @@ class SwitchingMode {
             this.hits++;
             ScoreSystem.addHit(reactionTime);
             
-            const nextTarget = this.targets.find(t => t.active && t.id !== this.currentTargetId);
-            if (nextTarget) {
-                this.currentTargetId = nextTarget.id;
+            const activeTargets = this.targets.filter(t => t.active);
+            if (activeTargets.length > 0) {
+                this.currentTargetId = activeTargets[0].id;
                 this.lastTargetTime = Date.now();
-            } else if (this.spawnedTargets >= this.targetsPerRound) {
-                this.end();
             }
         } else {
             const wrongTarget = this.targets.find(t => t.active && t.containsPoint(x, y));

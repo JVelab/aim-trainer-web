@@ -36,7 +36,7 @@ class Game {
         this.canvas.addEventListener('click', (e) => {
             if (this.modeInstance && this.isRunning && !this.isPaused) {
                 this.modeInstance.onClick(e.clientX, e.clientY);
-                UI.click(e);
+                UI.updateHUD();
             }
         });
 
